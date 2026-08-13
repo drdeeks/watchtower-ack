@@ -1,5 +1,10 @@
 # Federation Adapters
 
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white)](watchtower-ack-adapter/package.json)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](watchtower-ack-adapter/tsconfig.json)
+[![Status](https://img.shields.io/badge/status-early%20scaffolding-yellow)](watchtower-ack-adapter/docs/ADAPTER_SPEC_SHEET.md)
+
 Home for the translator/bridge layer between independent primitives in The
 Federation ecosystem. An adapter here owns no policy of its own — it
 normalizes one system's activity into another's event model, nothing more.

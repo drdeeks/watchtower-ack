@@ -1,5 +1,11 @@
 # Character Kit ⇄ Watchtower Bridge
 
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](../LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white)](package.json)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](tsconfig.json)
+[![Unit tests](https://img.shields.io/badge/unit%20tests-12%2F12%20passing-brightgreen)](tests/)
+[![Status](https://img.shields.io/badge/status-not%20production--ready-orange)](docs/ADAPTER_SPEC_SHEET.md)
+
 > A translator between two independent primitives. It owns no policy.
 
 A thin, **disposable** layer that lets your two existing systems talk:
