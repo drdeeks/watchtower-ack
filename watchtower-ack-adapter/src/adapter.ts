@@ -38,7 +38,7 @@ export interface BridgeInternals {
 export interface FullBridge extends Bridge, BridgeInternals {}
 
 export function createBridge(config: BridgeConfig): FullBridge {
-  const ck: CharacterKitClient = createCharacterKitClient(config.characterKitSocket);
+  const ck: CharacterKitClient = createCharacterKitClient(config.characterKitSocket, config.characterKitToken);
   const wt: WatchtowerClientHandle = createWatchtowerClient(config);
   const transport: Transport = createHttpTransport(wt, config.projectId, config.agentId);
   const state = new BridgeState();

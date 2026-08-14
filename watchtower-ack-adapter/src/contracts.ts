@@ -73,6 +73,7 @@ export interface WatchtowerState {
 /** Public bridge configuration (validated by config.ts). */
 export interface BridgeConfig {
   characterKitSocket?: string;
+  characterKitToken?: string;
   watchtowerGateway: string;
   watchtowerIngestionSecret: string;
   watchtowerProducer: string;

@@ -24,3 +24,16 @@
 - 2026-08-10 — Phase 2 (Character Kit client) left as boundary stub by design;
   real socket/Python transport deferred. Phase 3 (Watchtower client) uses real
   SDK surface but unexercised against live endpoint in tests.
+- 2026-08-13 — Phase 2 done for real: `character-kit.ts` now speaks the actual
+  daemon wire protocol (newline-delimited JSON over Unix socket / `tcp://`)
+  over `node:net`, verified against `agent_enforcer_daemon.js` and the Python
+  `EnforcerClient` source directly. `gateAction`, `injectHabit`,
+  `submitAcknowledgement`, `heartbeat` all implemented and translate the raw
+  daemon response into this bridge's `EnforcementResult` contract.
+  `characterKitToken` added to `BridgeConfig`/`config.ts`/`.env.example`
+  (`CHARACTER_KIT_TOKEN`) for the daemon's auth gate. Fixed a mislabeled
+  contract description in `docs/symbol-matrix.md`. New test file
+  `tests/character-kit.test.ts` (8 tests) runs the client against a fake
+  daemon speaking the real protocol — 20/20 total unit tests pass,
+  `tsc --noEmit` clean. Also fixed `package.json`'s `test` script (was
+  missing `--import tsx`, so `npm test` failed outright on Node 22.23.2).

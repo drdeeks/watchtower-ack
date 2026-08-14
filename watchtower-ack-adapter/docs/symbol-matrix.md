@@ -13,8 +13,17 @@ implementation, per blueprint §9/§10. Both repos were cloned and grepped.
 | Python client | `python/agent_character_kit/enforcer.py` → `class EnforcerClient(socket_path)` (291) | socket client |
 | Supervisor | `supervise.py` | restart path |
 
-**Enforcement result contract** (what the bridge consumes):
-`{ decision: "allowed" | "blocked", habit_id?, habit_summary?, ack_text?, decision_reason?, evidence }`
+**Enforcement result contract, corrected 2026-08-13 after reading the real
+daemon source (`node/enforcer/agent_enforcer_daemon.js:283-361`), not just
+this table:** the daemon's actual `execute_tool` wire response is
+`{ denied: boolean, reason?, reflection?, manifest?, self_verify_defects?, commit_intent? }` —
+confirmed independently by the Python `EnforcerClient`'s own handling of it
+(`enforcer.py:361-369`). The `{ decision: "allowed" | "blocked", habit_id?,
+habit_summary?, ack_text?, decision_reason?, evidence }` shape below is the
+**bridge's own** `EnforcementResult` contract (`src/contracts.ts`), not
+anything Character Kit emits natively — `src/bridge/character-kit.ts`
+translates one into the other and is the only file that ever sees the raw
+daemon response.
 
 ## Watchtower (`/tmp/fwt-src`, federation-serverless + @federation-watchtower/sdk v0.2.0)
 

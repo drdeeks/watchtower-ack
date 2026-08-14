@@ -9,6 +9,7 @@ import type { BridgeConfig } from "./contracts.js";
 
 export interface RawConfigInput {
   characterKitSocket?: string;
+  characterKitToken?: string;
   watchtowerGateway?: string;
   watchtowerIngestionSecret?: string;
   watchtowerProducer?: string;
@@ -39,6 +40,7 @@ export function resolveConfig(input: RawConfigInput = {}): BridgeConfig {
 
   return {
     characterKitSocket: input.characterKitSocket ?? process.env.CHARACTER_KIT_SOCKET,
+    characterKitToken: input.characterKitToken ?? process.env.CHARACTER_KIT_TOKEN,
     watchtowerGateway: gateway,
     watchtowerIngestionSecret: secret,
     watchtowerProducer: producer,

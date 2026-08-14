@@ -55,7 +55,7 @@ Enforced in `src/failure.ts`; asserted by `tests/adapter-roundtrip.test.ts` and
 
 ## Status — what is proven vs. not
 
-**Proven (12/12 unit tests pass, `tsc --noEmit` clean):**
+**Proven (20/20 unit tests pass, `tsc --noEmit` clean):**
 
 - Config resolution (fail-closed on missing secret).
 - Normalized event construction (unique `event_id`, sane defaults).
@@ -63,14 +63,24 @@ Enforced in `src/failure.ts`; asserted by `tests/adapter-roundtrip.test.ts` and
 - Dedupe (by `event_id`, then `correlation_id + sequence`).
 - Ordering (out-of-order detected; state not advanced).
 - Fail-closed classification (CK down → block; WT down → retry).
+- **The Character Kit client (`character-kit.ts`) against the real wire
+  protocol** — verified against `agent_enforcer_daemon.js`'s
+  `startSocketServer` and the Python `EnforcerClient` (same protocol, both
+  read as source, not assumed): newline-delimited JSON over a Unix socket
+  (or `tcp://host:port`), `{method, params, token?}` in, per-method response
+  out. `gateAction`, `injectHabit`, `submitAcknowledgement`, and `heartbeat`
+  are each tested end-to-end against a fake daemon speaking that exact
+  protocol (`tests/character-kit.test.ts`), including auth-token rejection
+  and unreachable-socket fail-closed paths.
 
 **NOT proven (do not claim these work):**
 
-- The live Character Kit enforcement socket / Python client — `character-kit.ts`
-  is a **boundary stub** that throws "unavailable" by design.
 - Live delivery to any Watchtower instance (`fapi.drdeeks.xyz` or local) — unit
   tests are hermetic; no test emits a real event over the network.
-- Transports `unix-socket.ts` / `mcp.ts` — not created (deferred full-tree items).
+- The Character Kit client against a **real running daemon** — tests use a
+  protocol-accurate fake, not `agent_enforcer_daemon.js` itself.
+- Transports `unix-socket.ts` (dedicated module) / `mcp.ts` — not created;
+  the Unix-socket transport that exists lives inline in `character-kit.ts`.
 - `scripts/` (start-dev / validate / replay-events) — not created.
 - e2e topology tests (root / user / agent-local) — not created.
 - x402 payment, org-rooms, sitcom UI — **out of scope**; they live in the

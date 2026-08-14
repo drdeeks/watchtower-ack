@@ -117,16 +117,39 @@ Each file's "must not contain" list is in the build blueprint. Honor it.
 
 - 2026-08-10 — Phase 0 (source inventory) DONE — `docs/symbol-matrix.md`.
 - 2026-08-10 — Phase 1 (contracts) DONE — `contracts.ts`, `events.ts`, `failure.ts`.
-- 2026-08-10 — Phase 2 (Character Kit client) BOUNDARY STUB only — `character-kit.ts`
-  throws "unavailable" by design; real socket/Python transport not wired.
+- 2026-08-13 — Phase 2 (Character Kit client) DONE — `character-kit.ts` speaks the
+  real daemon wire protocol directly over `node:net` (newline-delimited JSON,
+  Unix socket or `tcp://host:port`, `{method, params, token?}`), verified against
+  `agent_enforcer_daemon.js` (`startSocketServer`, line 853) and the Python
+  `EnforcerClient` (`enforcer.py:291`) — both read as source. No Python process
+  spawned; the protocol is language-agnostic. `docs/symbol-matrix.md`'s
+  "Enforcement result contract" line was corrected in the same pass: it had
+  mislabeled the bridge's own `EnforcementResult` shape as Character Kit's
+  native output; the real `execute_tool` response is `{denied, reason?,
+  reflection?, manifest?, self_verify_defects?, commit_intent?}`, translated by
+  `gateAction` into `EnforcementResult`. `injectHabit` calls `get_habit` (the
+  only externally-reachable read that verifies a habit is real) since the
+  daemon has no push-style injection RPC — habit-prompt injection is a
+  daemon-internal, pre-LLM-call decision (`pickPrompt`/`toolTick`), not
+  something this bridge triggers.
 - 2026-08-10 — Phase 3 (Watchtower client) DONE at surface — `watchtower.ts` uses
   the real SDK; NOT exercised against live `fapi.drdeeks.xyz` in tests.
-- 2026-08-10 — Phase 4 (adapter) DONE structurally; relies on Phase 2 stub for CK.
+- 2026-08-10 — Phase 4 (adapter) DONE structurally; no longer relies on a CK stub.
 - 2026-08-10 — Phase 5 (failure hardening) fail-closed LOGIC done + unit-tested;
   live crash/network simulation NOT yet integration-tested.
-- 2026-08-10 — Phase 6 (topology: root/user/local) NOT started.
-- 2026-08-10 — **Tests: 12/12 unit pass; `tsc --noEmit` clean.** Coverage is
-  contracts + normalization + fail-closed only (no live network, no real CK socket).
+- 2026-08-13 — Phase 6 (topology: root/user/local) still NOT started.
+  `submitAcknowledgement` hardcodes `session_id: "default"` in the meantime
+  (matches the daemon's own fallback for an omitted session_id) — no session
+  concept is threaded through `CharacterKitClient` yet.
+- 2026-08-13 — **Tests: 20/20 unit pass; `tsc --noEmit` clean.** New coverage:
+  `tests/character-kit.test.ts` runs `gateAction`/`injectHabit`/
+  `submitAcknowledgement`/`heartbeat` against a fake daemon that speaks the
+  exact real wire protocol (auth-token rejection and unreachable-socket
+  fail-closed paths included) — still not a real `agent_enforcer_daemon.js`
+  process, no live network in any test. Also fixed a real bug found in the
+  same pass: `package.json`'s `test` script was missing `--import tsx`, so
+  `npm test` failed outright on this Node version (22.23.2) — the previously
+  recorded "12/12 pass" wasn't reproducible via the documented command.
 
 ## 9. KNOWN GAPS (do not claim these work)
 
@@ -140,10 +163,15 @@ Each file's "must not contain" list is in the build blueprint. Honor it.
 
 ## 10. NEXT STEPS
 
-- [ ] Wire the real Character Kit client (Phase 2): socket or Python `EnforcerClient`.
+- [x] Wire the real Character Kit client (Phase 2): socket or Python `EnforcerClient`.
+- [ ] Integration test against a REAL `agent_enforcer_daemon.js` process, not
+      just the protocol-accurate fake in `tests/character-kit.test.ts`.
 - [ ] Integration test: emit a real event to a local/dev Watchtower.
-- [ ] Add `unix-socket.ts` transport + `scripts/`.
-- [ ] e2e topology tests (root-owned / user-owned / agent-local).
+- [ ] Add `unix-socket.ts` as its own module (today the transport lives inline
+      in `character-kit.ts`) + `scripts/`.
+- [ ] e2e topology tests (root-owned / user-owned / agent-local) — also where
+      `submitAcknowledgement`'s hardcoded `session_id: "default"` should be
+      replaced with a real threaded session.
 - [ ] Use the bridge inside hackathon submission(s) as the disclosure backbone.
 
 ## 11. AUTHORITY / READING ORDER
