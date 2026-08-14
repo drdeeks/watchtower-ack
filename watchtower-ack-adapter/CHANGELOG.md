@@ -37,3 +37,14 @@
   daemon speaking the real protocol — 20/20 total unit tests pass,
   `tsc --noEmit` clean. Also fixed `package.json`'s `test` script (was
   missing `--import tsx`, so `npm test` failed outright on Node 22.23.2).
+- 2026-08-13 — New doc `docs/FEDERATION_ROUTE_MAP.md`: full route-by-route
+  cross-reference against `~/projects/federation/docs/review/COMPLETE_SPEC.md`
+  §2, verified against the real SDK `.d.ts` and `watchtower.ts` directly.
+  Finding: `watchtower.ts` only ever wires the legacy producer-signed
+  `WatchtowerClient`, never `FederationOwnerClient`/`FederationAgentClient`
+  — even though the canonical path already covers owner/agent
+  registration, connect, heartbeat, events, disconnect, and lease request
+  on Federation's side today. Only four routes (lease validate, tool
+  authorize, validation gates, commands) are genuinely Federation-side
+  gaps with no canonical bearer path yet. Corrected Phase 3's AGENTS.md §8
+  status and ADAPTER_SPEC_SHEET.md's stale header table to reflect this.

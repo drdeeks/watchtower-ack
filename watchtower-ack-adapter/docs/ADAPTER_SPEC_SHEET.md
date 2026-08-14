@@ -1,20 +1,20 @@
 # Character Kit ⇄ Watchtower Bridge — Definitive Blueprint
 
-**Status as of 2026-08-13 (cross-checked against `AGENTS.md` §8, dated 2026-08-10 — read that section for the authoritative, continuously-updated status; this header is a snapshot, not the source of truth):**
+**Status as of 2026-08-13, later same day (cross-checked against `AGENTS.md` §8, same date — read that section for the authoritative, continuously-updated status; this header is a snapshot, not the source of truth):**
 
 | Phase | This blueprint's plan | Actual status |
 |---|---|---|
 | 0 — Source inventory | §10 | **DONE** — see `docs/symbol-matrix.md`. Resolves every item in §9 below (Character Kit exports, Watchtower SDK exports, event payload schema, auth shape, SDK-only vs SDK+REST — all confirmed against real source, not guessed). |
 | 1 — Bridge contract | §10 | **DONE** — `contracts.ts`, `events.ts`, `failure.ts` |
-| 2 — Character Kit client | §10 | **STUB ONLY** — `character-kit.ts` throws "unavailable" by design; no real socket/Python transport wired. **This is the actual remaining work.** |
-| 3 — Watchtower client | §10 | **DONE at surface** — `watchtower.ts` uses the real SDK; not yet exercised against live `fapi.drdeeks.xyz` |
-| 4 — Adapter | §10 | **DONE structurally**; relies on the Phase 2 stub for the Character Kit side |
+| 2 — Character Kit client | §10 | **DONE** — `character-kit.ts` speaks the real daemon wire protocol over `node:net` (verified against `agent_enforcer_daemon.js` + the Python `EnforcerClient` source directly). No more stub. |
+| 3 — Watchtower client | §10 | **DONE at surface, but legacy-only** — `watchtower.ts` wires `WatchtowerClient` (the producer-signed HMAC path) only. It never touches `FederationOwnerClient`/`FederationAgentClient`, even though `symbol-matrix.md` already verified both exist in the SDK. See `docs/FEDERATION_ROUTE_MAP.md` for the full canonical-vs-legacy route breakdown — this is real remaining work, not a stub. |
+| 4 — Adapter | §10 | **DONE structurally**; no longer relies on a Phase 2 stub. |
 | 5 — Failure hardening | §10 | Fail-closed **logic** done + unit-tested; live crash/network simulation not yet integration-tested |
 | 6 — Deployment topology | §10 | **NOT started** |
 
-Tests: 12/12 unit pass, `tsc --noEmit` clean. Coverage is contracts + normalization + fail-closed logic only — no live network, no real Character Kit socket exercised.
+Tests: 20/20 unit pass, `tsc --noEmit` clean (was 12/12 before Phase 2 landed). New coverage: `tests/character-kit.test.ts` runs the real socket transport against a fake daemon speaking the actual wire protocol. Still no live network test, no real `agent_enforcer_daemon.js` process, no real Watchtower endpoint exercised in any test.
 
-**Read `docs/symbol-matrix.md` before touching Phase 2** — it already has the verified upstream symbol names (`Enforcer.execute_tool`, `EnforcerClient(socket_path)`, `WatchtowerClient.emitEvent`, etc.) that this blueprint's §9 asks for.
+**Read `docs/symbol-matrix.md` before touching Phase 2/3 further** — it already has the verified upstream symbol names (`Enforcer.execute_tool`, `EnforcerClient(socket_path)`, `WatchtowerClient.emitEvent`, `FederationOwnerClient.registerAgent`, `FederationAgentClient.connect/heartbeat/disconnect/emit`, etc.) that this blueprint's §9 asks for. **Read `docs/FEDERATION_ROUTE_MAP.md` before touching Phase 3's credential model** — it maps every Federation route this bridge could call against canonical-vs-legacy auth, cross-referenced against `~/projects/federation/docs/review/COMPLETE_SPEC.md`, and lists exactly what's an adapter-side gap (most of it) vs. a genuine Federation-side gap (four specific routes with no canonical bearer path yet).
 
 ---
 

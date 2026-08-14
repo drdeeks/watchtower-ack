@@ -134,6 +134,16 @@ Each file's "must not contain" list is in the build blueprint. Honor it.
   something this bridge triggers.
 - 2026-08-10 — Phase 3 (Watchtower client) DONE at surface — `watchtower.ts` uses
   the real SDK; NOT exercised against live `fapi.drdeeks.xyz` in tests.
+- 2026-08-13 — **Correction to the above:** "DONE at surface" was true but
+  incomplete — `watchtower.ts` only wires `WatchtowerClient` (legacy
+  producer-signed HMAC). It never uses `FederationOwnerClient`/
+  `FederationAgentClient`, the canonical `fw_owner_*`/`fw_agent_*` path
+  Federation's own docs recommend for real agent identity, even though
+  `symbol-matrix.md` already verified both SDK exports exist. Full
+  route-by-route breakdown (which routes are canonical-capable, which are
+  legacy-HMAC-only on Federation's side regardless of what we do) is in
+  `docs/FEDERATION_ROUTE_MAP.md`. This is real remaining Phase 3 work, not
+  closed out.
 - 2026-08-10 — Phase 4 (adapter) DONE structurally; no longer relies on a CK stub.
 - 2026-08-10 — Phase 5 (failure hardening) fail-closed LOGIC done + unit-tested;
   live crash/network simulation NOT yet integration-tested.
@@ -163,6 +173,18 @@ Each file's "must not contain" list is in the build blueprint. Honor it.
 
 ## 10. NEXT STEPS
 
+- [ ] **Wire the canonical Watchtower path** (Phase 3, real remaining work):
+      `FederationOwnerClient`/`FederationAgentClient` for owner creation,
+      agent registration, connect/heartbeat/events/disconnect, and lease
+      request — all canonical-capable per `docs/FEDERATION_ROUTE_MAP.md`.
+      Needs a `fw_owner_*`/`fw_agent_*` credential concept in
+      `config.ts`/`contracts.ts`, distinct from today's single
+      `watchtowerIngestionSecret`.
+- [ ] Four routes (lease validate, tool authorize, validation gates,
+      commands) have no canonical bearer path on Federation's side yet —
+      that's Federation's gap, not this adapter's; a fully-canonical
+      adapter still needs the legacy HMAC secret for those four until
+      Federation adds it. Tracked in `docs/FEDERATION_ROUTE_MAP.md`.
 - [x] Wire the real Character Kit client (Phase 2): socket or Python `EnforcerClient`.
 - [ ] Integration test against a REAL `agent_enforcer_daemon.js` process, not
       just the protocol-accurate fake in `tests/character-kit.test.ts`.
